@@ -10,7 +10,7 @@ This tool extracts wood surface features using Gradient Magnitude Support Region
 Default processing uses a 900x900 pixel region starting at position (200,400): but this is just to focus on intresting features on the test image. you can adapt it in the code to your needs.
 
 |  Cropped Region | GMSR Features (SVG) |
-|----------------------------|----------------|-------------------|
+|----------------------------|----------------|
 | ![Cropped Region](images/cropped_region.jpg) | ![GMSR Features](images/output.svg) |
 
 The SVG output contains pure vector paths of the detected features
