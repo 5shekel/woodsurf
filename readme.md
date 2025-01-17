@@ -11,7 +11,8 @@ Default processing uses a 900x900 pixel region starting at position (200,400): b
 
 |  Cropped Region | GMSR Features (SVG) |
 |----------------------------|----------------|
-| ![Cropped Region](images/cropped_region.jpg) | ![GMSR Features](images/output.svg) |
+| ![Cropped Region](images/cropped_region.jpg) |  <img src="images/output.svg" width="100" height="100"></img>|
+
 
 The SVG output contains pure vector paths of the detected features
 
