@@ -87,9 +87,10 @@ def compute_log_filter(tau_l=1.0):
     
     return f
 
-def extract_lgsr(image, tau_l=1.0, threshold=0.2):
+def extract_lgsr(image, tau_l=1.5, threshold=0.15):
     """
     Extract Laplacian of Gaussian based Support Regions as described in Section 2.2
+    Using larger tau_l for better blob detection and lower threshold for more sensitivity
     """
     print("Computing LoG filter...")
     # Get LoG filter
@@ -103,8 +104,13 @@ def extract_lgsr(image, tau_l=1.0, threshold=0.2):
     M = M / np.max(np.abs(M))
     
     print("Thresholding LoG response...")
-    # Threshold for blob detection
-    SR = np.abs(M) > threshold
+    # Threshold for blob detection with hysteresis-like approach
+    strong_SR = np.abs(M) > threshold
+    weak_SR = np.abs(M) > threshold * 0.7
+    
+    # Use morphological operations to connect nearby regions
+    from skimage.morphology import binary_closing, disk
+    SR = binary_closing(strong_SR | weak_SR, disk(2))
     
     return SR
 
@@ -184,13 +190,7 @@ def compute_curvature(b_hat):
 
 def process_image(image_path, crop_x=200, crop_y=400, crop_width=900, crop_height=900):
     """
-    Process image following the paper's methodology
-    Args:
-        image_path: Path to the image
-        crop_x: X coordinate of crop start position
-        crop_y: Y coordinate of crop start position
-        crop_width: Width of crop region
-        crop_height: Height of crop region
+    Process image following the paper's methodology with enhanced visualization
     """
     print("Loading image...")
     # Load and convert image to grayscale
@@ -217,22 +217,33 @@ def process_image(image_path, crop_x=200, crop_y=400, crop_width=900, crop_heigh
     print("LGSR extraction complete")
     
     print("Visualizing results...")
-    # Visualize results
-    plt.figure(figsize=(15, 5))
+    # Create enhanced visualization
+    plt.figure(figsize=(20, 5))
     
-    plt.subplot(131)
+    plt.subplot(141)
     plt.title('Original Image (Cropped)')
     plt.imshow(image, cmap='gray')
     plt.axis('off')
     
-    plt.subplot(132)
-    plt.title('GMSR')
+    plt.subplot(142)
+    plt.title('GMSR (Edge Detection)')
     plt.imshow(gmsr, cmap='gray')
     plt.axis('off')
     
-    plt.subplot(133)
-    plt.title('LGSR')
+    plt.subplot(143)
+    plt.title('LGSR (Blob Detection)')
     plt.imshow(lgsr, cmap='gray')
+    plt.axis('off')
+    
+    # Create combined visualization
+    combined = np.zeros((*image.shape, 3))
+    combined[gmsr] = [1, 0, 0]  # GMSR in red
+    combined[lgsr] = [0, 1, 0]  # LGSR in green
+    combined[gmsr & lgsr] = [1, 1, 0]  # Overlap in yellow
+    
+    plt.subplot(144)
+    plt.title('Combined (Red=GMSR, Green=LGSR, Yellow=Both)')
+    plt.imshow(combined)
     plt.axis('off')
     
     plt.tight_layout()
